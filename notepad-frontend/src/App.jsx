@@ -53,8 +53,10 @@ function Home() {
 
 function NoteEditor() {
   const { linkId } = useParams();
+  const navigate = useNavigate();
   const [note, setNote] = useState('');
   const [loaded, setLoaded] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     axios
@@ -84,9 +86,28 @@ function NoteEditor() {
     }
   };
 
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      alert('Failed to copy link');
+    }
+  };
+
   return (
     <div className="p-4 max-w-xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Edit Note</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Edit Note</h1>
+        <button
+          className="bg-gray-500 text-white px-3 py-1 rounded text-sm"
+          onClick={() => navigate('/')}
+        >
+          + New Note
+        </button>
+      </div>
+
       {loaded ? (
         <>
           <textarea
@@ -95,12 +116,20 @@ function NoteEditor() {
             value={note}
             onChange={(e) => setNote(e.target.value)}
           />
-          <button
-            className="bg-blue-600 text-white px-4 py-2 rounded"
-            onClick={saveNote}
-          >
-            Save
-          </button>
+          <div className="flex space-x-2">
+            <button
+              className="bg-blue-600 text-white px-4 py-2 rounded"
+              onClick={saveNote}
+            >
+              Save
+            </button>
+            <button
+              className="bg-gray-700 text-white px-4 py-2 rounded"
+              onClick={copyLink}
+            >
+              {copied ? 'Copied!' : 'Copy Link'}
+            </button>
+          </div>
         </>
       ) : (
         <p>Loading...</p>
@@ -108,6 +137,7 @@ function NoteEditor() {
     </div>
   );
 }
+
 
 export default function App() {
   return (
